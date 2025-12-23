@@ -16,7 +16,6 @@ Rules:
 - If the answer cannot be found in the context, say:
   "Bu bilgi verilen bölümlerde bulunmuyor."
 - Keep answers concise and factual.
-- When possible, reference chapter numbers.
 
 Context:
 {context}

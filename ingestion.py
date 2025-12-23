@@ -16,13 +16,13 @@ EMBED_MODEL = os.getenv("OPENAI_EMBEDDING_MODEL", "text-embedding-3-large")
 
 def process_single_json(file_path, filename):
     docs = []
+    
     pathway_name = filename.replace("_sequences.json", "").replace("_sequence.json", "").replace(".json", "").capitalize()
     
     try:
         with open(file_path, "r", encoding="utf-8") as f:
             raw_data = json.load(f)
         
-        # JSON yapısı: [ { "items": [...] } ]
         all_items = []
         if isinstance(raw_data, list) and len(raw_data) > 0:
             all_items = raw_data[0].get("items", [])
@@ -32,17 +32,17 @@ def process_single_json(file_path, filename):
         print(f"   -> Processing '{pathway_name}': Found {len(all_items)} sequences.")
 
         for item in all_items:
-            content = item.get("text", "").strip()
+            raw_text = item.get("text", "").strip()
             title = item.get("title", f"{pathway_name} Sequence")
             sequence_num = item.get("sequence", -1)
             url = item.get("page_url", "")
             
-            if not content:
+            if not raw_text:
                 continue
-
+            
             docs.append(
                 Document(
-                    page_content=content,
+                    page_content=raw_text, 
                     metadata={
                         "source": filename,
                         "pathway": pathway_name, 
@@ -64,7 +64,6 @@ def build_index() -> int:
 
     all_docs = []
     
-    # Klasördeki tüm dosyaları tara
     print(f"Scanning directory: {DATA_DIR} ...")
     files = [f for f in os.listdir(DATA_DIR) if f.endswith(".json")]
     
@@ -72,7 +71,6 @@ def build_index() -> int:
         print("Klasörde hiç .json dosyası bulunamadı.")
         return 0
 
-    # Her dosyayı işle ve listeye ekle
     for filename in files:
         file_path = os.path.join(DATA_DIR, filename)
         file_docs = process_single_json(file_path, filename)
@@ -80,16 +78,37 @@ def build_index() -> int:
 
     print(f"\nTotal documents collected from {len(files)} files: {len(all_docs)}")
 
-    # Text Splitting
     splitter = RecursiveCharacterTextSplitter(
-        chunk_size=1000,
-        chunk_overlap=100,
+        chunk_size=1100,
+        chunk_overlap=200,
+        separators=[
+            "\nAuthorities",             
+            "\nMythical Creature Form",  
+            "\nNew Abilities",           
+            "\nStrengthened Abilities",  
+            "\n\n",                      
+            "\n",                       
+            ". ",                        
+            " ",                         
+            ""                           
+        ]
     )
     
     chunks = splitter.split_documents(all_docs)
-    print(f"Created {len(chunks)} chunks total.")
+    print(f"Splitting complete. Created {len(chunks)} raw chunks.")
+    
+    for chunk in chunks:
+        meta = chunk.metadata
+        pathway = meta.get("pathway", "Unknown")
+        title = meta.get("title", "Unknown Title")
+        
+        header_text = f"Pathway: {pathway}\nTitle: {title}\n\nContent:\n"
+        
+        chunk.page_content = header_text + chunk.page_content
 
-    # Embedding ve Vectorstore
+    print("Metadata headers injected into all chunks.")
+    # ---------------------------------------
+
     embeddings = OpenAIEmbeddings(model=EMBED_MODEL)
 
     vectorstore = Chroma(

@@ -6,7 +6,7 @@ def generate(state: GraphState):
     documents = state.get("documents") or []
 
     if len(documents) == 0:
-        generation = "Bu bilgi verilen bölümlerde bulunmuyor."
+        generation = "Aradığınız bilgi veritabanındaki pathway veya yetenekler arasında bulunamadı."
         return {
             "question": question,
             "documents": [],
@@ -15,7 +15,7 @@ def generate(state: GraphState):
         }
 
     context = "\n\n".join(
-        f"[Chapter {d.metadata.get('chapter_id')} - {d.metadata.get('chapter_title','')}]\n{d.page_content}"
+        f"[{d.metadata.get('pathway', 'Unknown Pathway')} - {d.metadata.get('title', 'Unknown Sequence')}]\n{d.page_content}"
         for d in documents
     )
 
