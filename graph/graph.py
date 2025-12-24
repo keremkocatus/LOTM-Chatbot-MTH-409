@@ -62,7 +62,7 @@ workflow.add_conditional_edges(
     {WEBSEARCH: WEBSEARCH, GENERATE: GENERATE},
 )
 
-workflow.add_edge(WEBSEARCH, GENERATE)
+workflow.add_edge(WEBSEARCH, END)
 
 workflow.add_conditional_edges(
     GENERATE,
