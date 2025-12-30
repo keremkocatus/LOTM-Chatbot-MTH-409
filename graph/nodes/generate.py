@@ -7,6 +7,7 @@ def generate(state: GraphState):
     question = state["question"]
     documents = state.get("documents") or []
     temperature = state.get("temperature") or 0.5  # None ise varsayılan 0.5
+    provider = state.get("model_provider") or "openai"
 
     if len(documents) == 0:
         generation = "Aradığınız bilgi veritabanındaki pathway veya yetenekler arasında bulunamadı."
@@ -23,8 +24,8 @@ def generate(state: GraphState):
         for d in documents
     )
 
-    # Temperature ile dinamik chain oluştur
-    generation_chain = get_generation_chain(temperature)
+    # Temperature ve provider ile dinamik chain oluştur
+    generation_chain = get_generation_chain(temperature, provider)
     
     generation = generation_chain.invoke({
         "context": context,

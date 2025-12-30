@@ -1,15 +1,19 @@
-from graph.chains.retrieval_grader import retrieval_grader
+from graph.chains.retrieval_grader import get_retrieval_grader
 from graph.state import GraphState
 
 def grade_documents(state: GraphState):
     """Getirilen belgelerin soruyla ilgili olup olmadığını değerlendirir."""
     question = state["question"]
     documents = state["documents"]
+    provider = state.get("model_provider") or "openai"
     
     print(f"\n📋 GRADING ({len(documents)} belge)")
     
     filtered = []
     web_search = False
+    
+    # Provider'a göre grader al
+    retrieval_grader = get_retrieval_grader(provider)
 
     for i, d in enumerate(documents):
         score = retrieval_grader.invoke({
@@ -26,7 +30,7 @@ def grade_documents(state: GraphState):
     # Hiç ilgili belge yoksa OpenAI bilgisine yönlendir
     if len(filtered) == 0:
         web_search = True
-        print(f"   ⚠️  Hiç ilgili belge yok -> OpenAI'a yönlendiriliyor")
+        print(f"   ⚠️  Hiç ilgili belge yok -> Web Search'e yönlendiriliyor")
     else:
         print(f"   ✅ {len(filtered)} ilgili belge bulundu")
     print(f"{'='*50}\n")

@@ -1,5 +1,6 @@
 from dotenv import load_dotenv
 from langchain_openai import ChatOpenAI
+from langchain_google_genai import ChatGoogleGenerativeAI
 from langchain_core.prompts import ChatPromptTemplate
 from langchain_core.output_parsers import StrOutputParser
 from ddgs import DDGS
@@ -12,6 +13,7 @@ def web_search(state: GraphState):
     """DuckDuckGo ile gerçek web araması yapar ve sonuçları özetler."""
     question = state["question"]
     temperature = state.get("temperature") or 0.5
+    provider = state.get("model_provider") or "openai"
     
     print(f"\n🌐 WEB SEARCH")
     print(f"   Sorgu: {question}")
@@ -26,8 +28,11 @@ def web_search(state: GraphState):
         print(f"   ❌ Web arama hatası: {e}")
         search_results = ""
     
-    # Sonuçları LLM ile özetle
-    llm = ChatOpenAI(model="gpt-4o", temperature=temperature)
+    # Provider'a göre LLM seç
+    if provider == "gemini":
+        llm = ChatGoogleGenerativeAI(model="gemini-3-flash-preview", temperature=temperature)
+    else:
+        llm = ChatOpenAI(model="gpt-4o", temperature=temperature)
     
     prompt = ChatPromptTemplate.from_template(
         """Sen Lord of the Mysteries evreni hakkında uzman bir asistansın.
