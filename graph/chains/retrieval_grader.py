@@ -3,13 +3,19 @@ from langchain_core.pydantic_v1 import BaseModel, Field
 from langchain_openai import ChatOpenAI
 
 class GradeDocuments(BaseModel):
-    binary_score: str = Field(description="yes or no")
+    binary_score: bool = Field(description="True if relevant, False otherwise")
 
-llm = ChatOpenAI(temperature=0)
+llm = ChatOpenAI(model="gpt-4o", temperature=0)
 structured_llm_grader = llm.with_structured_output(GradeDocuments)
 
-system = """You are a grader assessing relevance of a document to a question.
-Return 'yes' if the document is relevant to answering the question, otherwise return 'no'."""
+system = """You are a grader assessing relevance of a document to a user question.
+
+The document is from Lord of the Mysteries wiki about Beyonder pathways, sequences, and abilities.
+
+Return True if the document contains ANY information that could help answer the question, even partially.
+Return False ONLY if the document is completely unrelated to the question.
+
+Be lenient - if there's any chance the document is useful, return True."""
 
 grade_prompt = ChatPromptTemplate.from_messages([
     ("system", system),

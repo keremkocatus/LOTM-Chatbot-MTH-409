@@ -5,7 +5,7 @@ from langchain_openai import ChatOpenAI
 class GradeHallucination(BaseModel):
     binary_score: bool = Field(description="yes or no")
 
-llm = ChatOpenAI(temperature=0)
+llm = ChatOpenAI(model="gpt-4o", temperature=0)
 structured_llm = llm.with_structured_output(GradeHallucination)
 
 prompt = ChatPromptTemplate.from_messages([

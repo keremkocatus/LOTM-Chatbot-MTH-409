@@ -1,41 +1,55 @@
+from dotenv import load_dotenv
 from langchain_openai import ChatOpenAI
 from langchain_core.prompts import ChatPromptTemplate
 from langchain_core.output_parsers import StrOutputParser
+from ddgs import DDGS
 from graph.state import GraphState
-import os
 
-llm = ChatOpenAI(
-    model="gpt-4o", 
-    temperature=0.5  
-)
+load_dotenv()
+
 
 def web_search(state: GraphState):
-    """
-    Belgelerde bilgi bulunamadığında LLM'in kendi hafızasını kullanarak cevap üretmesini sağlar.
-    """
-    print("--- NO RELEVANT DOCS FOUND: ANSWERING FROM MEMORY ---")
-    
+    """DuckDuckGo ile gerçek web araması yapar ve sonuçları özetler."""
     question = state["question"]
+    temperature = state.get("temperature") or 0.5
+    
+    print(f"\n🌐 WEB SEARCH")
+    print(f"   Sorgu: {question}")
+    
+    # DuckDuckGo araması (yeni ddgs paketi)
+    try:
+        with DDGS() as ddgs:
+            results = list(ddgs.text(f"Lord of the Mysteries {question}", max_results=5))
+            search_results = "\n".join([f"- {r['title']}: {r['body']}" for r in results])
+        print(f"   ✅ Web sonuçları alındı ({len(results)} sonuç)")
+    except Exception as e:
+        print(f"   ❌ Web arama hatası: {e}")
+        search_results = ""
+    
+    # Sonuçları LLM ile özetle
+    llm = ChatOpenAI(model="gpt-4o", temperature=temperature)
     
     prompt = ChatPromptTemplate.from_template(
-        """Sen Lord of the Mysteries evreni hakkında uzman bir asistansın. 
-        Kullanıcının sorduğu soru hakkında veritabanımızda (vector store) doğrudan bir kaynak belge bulunamadı.
+        """Sen Lord of the Mysteries evreni hakkında uzman bir asistansın.
         
-        Bu yüzden, kendi eğitim verini ve genel bilgini kullanarak bu soruyu en doğru şekilde ve tam olarak cevapla.
-        Eğer cevabı gerçekten bilmiyorsan veya emin değilsen, uydurmak yerine nazikçe bilmediğini belirt.
-        Konudan bağımsız ise soru kibarca cevap veremeyeceğini belirt.
+        Kullanıcının sorusu: {question}
         
-        Soru: {question}
+        Web arama sonuçları:
+        {search_results}
+        
+        Bu web arama sonuçlarını kullanarak soruyu Türkçe olarak detaylı ve doğru bir şekilde cevapla.
+        Eğer sonuçlarda yeterli bilgi yoksa, kendi bilgini de kullanabilirsin ama bunu belirt.
+        
         Cevap:"""
     )
     
     chain = prompt | llm | StrOutputParser()
-    
-    generation = chain.invoke({"question": question})
+    generation = chain.invoke({"question": question, "search_results": search_results})
     
     return {
         "question": question,
-        "documents": [], 
+        "documents": [],
         "generation": generation,
-        "web_search": False, 
+        "web_search": False,
+        "source_type": "web_search",
     }

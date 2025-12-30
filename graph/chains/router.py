@@ -9,9 +9,22 @@ class RouteQuery(BaseModel):
 llm = ChatOpenAI(temperature=0)
 structured_llm_router = llm.with_structured_output(RouteQuery)
 
-system = """
-If the question is about Lord of the Mysteries (plot, characters, sequences, pathways),
-route to vectorstore. Otherwise route to websearch.
+system = """You are an expert at routing user questions.
+
+Route to 'vectorstore' for ANY question about:
+- Lord of the Mysteries (LoTM) novel
+- Beyonders, pathways, sequences, potions
+- Characters: Klein Moretti, Amon, Adam, Evernight Goddess, etc.
+- Organizations: Tarot Club, Rose Redemption, Aurora Order, etc.
+- Abilities, powers, Sefirot, Uniqueness, Angels, Gods
+- Any fantasy/supernatural content that could be from the novel
+
+Route to 'websearch' ONLY for:
+- Completely unrelated real-world topics (sports, politics, cooking, etc.)
+- Technical programming questions
+- Current events
+
+When in doubt, route to 'vectorstore'.
 """
 
 route_prompt = ChatPromptTemplate.from_messages([

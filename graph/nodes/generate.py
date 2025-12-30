@@ -1,9 +1,12 @@
-from graph.chains.generation import generation_chain
+from graph.chains.generation import get_generation_chain
 from graph.state import GraphState
 
+
 def generate(state: GraphState):
+    """Getirilen belgelere dayanarak cevap üretir."""
     question = state["question"]
     documents = state.get("documents") or []
+    temperature = state.get("temperature") or 0.5  # None ise varsayılan 0.5
 
     if len(documents) == 0:
         generation = "Aradığınız bilgi veritabanındaki pathway veya yetenekler arasında bulunamadı."
@@ -12,6 +15,7 @@ def generate(state: GraphState):
             "documents": [],
             "generation": generation,
             "web_search": False,
+            "source_type": "no_docs",
         }
 
     context = "\n\n".join(
@@ -19,6 +23,9 @@ def generate(state: GraphState):
         for d in documents
     )
 
+    # Temperature ile dinamik chain oluştur
+    generation_chain = get_generation_chain(temperature)
+    
     generation = generation_chain.invoke({
         "context": context,
         "question": question
@@ -29,4 +36,5 @@ def generate(state: GraphState):
         "documents": documents,
         "generation": generation,
         "web_search": False,
+        "source_type": "vectorstore",
     }

@@ -38,7 +38,12 @@ def grade_generation_grounded_in_documents_and_question(state: GraphState) -> st
     h = hallucination_grader.invoke({"documents": documents, "generation": generation})
     if h.binary_score:
         a = answer_grader.invoke({"question": question, "generation": generation})
-        return "useful" if a.binary_score else "not useful"
+        if a.binary_score:
+            return "useful"
+        else:
+            print("   ⚠️ Cevap faydalı değil -> Web Search'e yönlendiriliyor")
+            return "not useful"
+    print("   ⚠️ Cevap belgelerle desteklenmiyor -> Web Search'e yönlendiriliyor")
     return "not supported"
 
 
@@ -67,7 +72,7 @@ workflow.add_edge(WEBSEARCH, END)
 workflow.add_conditional_edges(
     GENERATE,
     grade_generation_grounded_in_documents_and_question,
-    {"useful": END, "not useful": END, "not supported": END},
+    {"useful": END, "not useful": WEBSEARCH, "not supported": WEBSEARCH},
 )
 
 app = workflow.compile()
