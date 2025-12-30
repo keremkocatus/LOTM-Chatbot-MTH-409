@@ -2,20 +2,24 @@ from langchain_core.prompts import ChatPromptTemplate
 from langchain_core.output_parsers import StrOutputParser
 from langchain_openai import ChatOpenAI
 
-llm = ChatOpenAI(
-    model="gpt-4o-mini",
-    temperature=0.5,
-)
+def get_generation_chain(temperature: float = 0.5):
+    """Temperature parametresiyle generation chain döndürür."""
+    llm = ChatOpenAI(
+        model="gpt-4o",
+        temperature=temperature,
+    )
 
-prompt = ChatPromptTemplate.from_template("""
-You are a strict lore assistant for the novel "Lord of the Mysteries".
+    prompt = ChatPromptTemplate.from_template("""
+You are a knowledgeable lore assistant for the novel "Lord of the Mysteries".
 
 Rules:
-- Answer using the provided context.
-- Do NOT add information not present in the context.
-- If the answer cannot be found in the context, say:
-  "Bu bilgi verilen bölümlerde bulunmuyor."
-- Keep answers concise and factual.
+- Answer the user's question using ONLY the provided context documents.
+- The context is in English but user may ask in Turkish - translate/interpret as needed.
+- "Sıra X" or "Sequence X" refers to Beyonder sequence levels (Sıra 9 = Sequence 9 = lowest, Sıra 0/1 = highest).
+- Summarize and explain the relevant information from the context.
+- If the context contains relevant information, USE IT to answer - don't say "not found".
+- Only say "Bu bilgi verilen bölümlerde bulunmuyor" if the context truly has NO relevant info.
+- Answer in the same language as the question (Turkish question = Turkish answer).
 
 Context:
 {context}
@@ -26,4 +30,7 @@ Question:
 Answer:
 """)
 
-generation_chain = prompt | llm | StrOutputParser()
+    return prompt | llm | StrOutputParser()
+
+# Varsayılan chain (geriye dönük uyumluluk için)
+generation_chain = get_generation_chain()

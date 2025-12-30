@@ -79,7 +79,7 @@ def build_index() -> int:
     print(f"\nTotal documents collected from {len(files)} files: {len(all_docs)}")
 
     splitter = RecursiveCharacterTextSplitter(
-        chunk_size=1100,
+        chunk_size=1500,
         chunk_overlap=200,
         separators=[
             "\nAuthorities",             
@@ -107,7 +107,6 @@ def build_index() -> int:
         chunk.page_content = header_text + chunk.page_content
 
     print("Metadata headers injected into all chunks.")
-    # ---------------------------------------
 
     embeddings = OpenAIEmbeddings(model=EMBED_MODEL)
 
@@ -134,6 +133,27 @@ def get_retriever():
         embedding_function=embeddings,
     )
     return vs.as_retriever(search_kwargs={"k": K})
+
+def get_retriever_with_params(k: int = None, filter_dict: dict = None):
+    """Parametreli retriever döndürür."""
+    embeddings = OpenAIEmbeddings(model=EMBED_MODEL)
+    vs = Chroma(
+        collection_name=COLLECTION,
+        persist_directory=CHROMA_DIR,
+        embedding_function=embeddings,
+    )
+    
+    search_kwargs = {"k": k or K}
+    if filter_dict:
+        # Chroma birden fazla filtre için $and operatörü gerektirir
+        if len(filter_dict) > 1:
+            search_kwargs["filter"] = {
+                "$and": [{key: value} for key, value in filter_dict.items()]
+            }
+        else:
+            search_kwargs["filter"] = filter_dict
+    
+    return vs.as_retriever(search_kwargs=search_kwargs)
 
 if __name__ == "__main__":
     build_index()
