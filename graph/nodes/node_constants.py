@@ -1,4 +1,5 @@
 RETRIEVE = "retrieve"
 GRADE_DOCUMENTS = "grade_documents"
 GENERATE = "generate"
+OFF_TOPIC = "off_topic"
 WEBSEARCH = "websearch"

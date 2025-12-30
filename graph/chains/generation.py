@@ -1,13 +1,20 @@
 from langchain_core.prompts import ChatPromptTemplate
 from langchain_core.output_parsers import StrOutputParser
 from langchain_openai import ChatOpenAI
+from langchain_google_genai import ChatGoogleGenerativeAI
 
-def get_generation_chain(temperature: float = 0.5):
-    """Temperature parametresiyle generation chain döndürür."""
-    llm = ChatOpenAI(
-        model="gpt-4o",
-        temperature=temperature,
-    )
+def get_generation_chain(temperature: float = 0.5, provider: str = "openai"):
+    """Temperature ve provider parametreleriyle generation chain döndürür."""
+    if provider == "gemini":
+        llm = ChatGoogleGenerativeAI(
+            model="gemini-3-flash-preview",
+            temperature=temperature,
+        )
+    else:
+        llm = ChatOpenAI(
+            model="gpt-4o",
+            temperature=temperature,
+        )
 
     prompt = ChatPromptTemplate.from_template("""
 You are a knowledgeable lore assistant for the novel "Lord of the Mysteries".

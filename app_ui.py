@@ -33,6 +33,22 @@ st.markdown("""
 
 st.title("🔮 Lord of the Mysteries Chatbot")
 
+# Sidebar'da model seçimi
+with st.sidebar:
+    st.header("⚙️ Ayarlar")
+    
+    model_provider = st.radio(
+        "🤖 Model Seçimi",
+        options=["openai", "gemini"],
+        format_func=lambda x: "🟢 OpenAI (GPT-4o)" if x == "openai" else "🔵 Google Gemini",
+        index=0,
+        help="Kullanılacak AI modelini seçin"
+    )
+    
+    st.divider()
+    st.caption("OpenAI: GPT-4o modeli kullanır")
+    st.caption("Gemini: Google Gemini 3 Flash modeli kullanır")
+
 if "messages" not in st.session_state:
     st.session_state.messages = []
 
@@ -56,12 +72,16 @@ if prompt := st.chat_input("Sorunuzu yazın..."):
     with st.chat_message("assistant", avatar="🔮"):
         message_placeholder = st.empty()
         
-        with st.spinner("Bilgi çekiliyor..."):
+        model_emoji = "🟢" if model_provider == "openai" else "🔵"
+        model_name = "OpenAI" if model_provider == "openai" else "Gemini"
+        
+        with st.spinner(f"{model_emoji} {model_name} ile bilgi çekiliyor..."):
             try:
                 result = app.invoke({
                     "question": prompt,
                     "k_retrieved": 6,
-                    "temperature": 0.3
+                    "temperature": 0.3,
+                    "model_provider": model_provider
                 })
                 
                 answer = result.get("generation", "Bilgiye erişilemedi.")
@@ -84,8 +104,8 @@ if prompt := st.chat_input("Sorunuzu yazın..."):
                                 st.markdown(f"• {s}")
                 elif source_type == "web_search":
                     st.info("🌐 Kaynak: Web Araması (DuckDuckGo)")
-                elif source_type == "openai_knowledge":
-                    st.info("🧠 Kaynak: OpenAI Bilgi Tabanı")
+                elif source_type == "off_topic":
+                    pass  # Off-topic mesajı zaten cevabın içinde
 
                 st.session_state.messages.append({
                     "role": "assistant", 

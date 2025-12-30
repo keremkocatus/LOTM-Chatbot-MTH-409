@@ -50,9 +50,10 @@ This chatbot uses a sophisticated RAG pipeline to answer questions about Beyonde
 
 - **LangChain & LangGraph**: Orchestration and workflow management
 - **ChromaDB**: Vector database for semantic search
-- **OpenAI**: Embeddings (`text-embedding-3-large`) and LLM (`gpt-4o-mini`, `gpt-4o`)
+- **OpenAI**: Embeddings (`text-embedding-3-large`) and LLM (`gpt-4o`)
+- **Google Gemini**: Alternative LLM (`gemini-3-flash-preview`)
 - **DuckDuckGo**: Free web search fallback
-- **Streamlit**: Web UI
+- **Streamlit**: Web UI with model selection
 
 ## 📁 Project Structure
 
@@ -109,6 +110,7 @@ pip install -r requirements.txt
 Create a `.env` file:
 ```env
 OPENAI_API_KEY=your_openai_api_key_here
+GOOGLE_API_KEY=your_google_api_key_here
 LOTM_DATA_DIR=./data
 CHROMA_DB_PATH=./.chroma_lotm
 CHROMA_COLLECTION=lotm-chroma
@@ -127,6 +129,11 @@ streamlit run app_ui.py
 ```
 
 ## 💡 Features
+
+### 🤖 Multi-Model Support
+- **OpenAI GPT-4o**: High-quality responses with OpenAI
+- **Google Gemini 3 Flash**: Fast and efficient alternative
+- Switch between models via sidebar toggle in the UI
 
 ### Smart Query Routing
 - Automatically routes LoTM-related questions to vector store
@@ -249,6 +256,7 @@ The pathway data was scraped from [Lord of the Mysteries Wiki](https://lordofthe
 
 | Parameter | Default | Description |
 |-----------|---------|-------------|
+| `model_provider` | openai | LLM provider (openai / gemini) |
 | `k_retrieved` | 6 | Number of documents to retrieve |
 | `temperature` | 0.3 | LLM temperature (0-1) |
 

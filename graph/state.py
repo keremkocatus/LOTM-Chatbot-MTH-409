@@ -1,4 +1,4 @@
-from typing import List, TypedDict, Optional
+from typing import List, TypedDict, Optional, Literal
 from langchain_core.documents import Document
 
 
@@ -11,3 +11,4 @@ class GraphState(TypedDict):
     k_retrieved: Optional[int]
     temperature: Optional[float]
     source_type: Optional[str]
+    model_provider: Optional[Literal["openai", "gemini"]]

@@ -1,16 +1,25 @@
 from langchain_core.prompts import ChatPromptTemplate
-from langchain_core.pydantic_v1 import BaseModel, Field
+from pydantic import BaseModel, Field
 from langchain_openai import ChatOpenAI
+from langchain_google_genai import ChatGoogleGenerativeAI
 
 class GradeAnswer(BaseModel):
     binary_score: bool = Field(description="yes or no")
-
-llm = ChatOpenAI(temperature=0)
-structured_llm = llm.with_structured_output(GradeAnswer)
 
 prompt = ChatPromptTemplate.from_messages([
     ("system", "Does the answer address the question?"),
     ("human", "Question: {question}\nAnswer: {generation}")
 ])
 
-answer_grader = prompt | structured_llm
+def get_answer_grader(provider: str = "openai"):
+    """Provider'a göre answer grader döndürür."""
+    if provider == "gemini":
+        llm = ChatGoogleGenerativeAI(model="gemini-3-flash-preview", temperature=0)
+    else:
+        llm = ChatOpenAI(model="gpt-4o", temperature=0)
+    
+    structured_llm = llm.with_structured_output(GradeAnswer)
+    return prompt | structured_llm
+
+# Varsayılan (geriye dönük uyumluluk)
+answer_grader = get_answer_grader("openai")

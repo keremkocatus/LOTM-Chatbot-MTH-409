@@ -1,8 +1,7 @@
 from langchain_core.prompts import ChatPromptTemplate
 from langchain_core.output_parsers import StrOutputParser
 from langchain_openai import ChatOpenAI
-
-llm = ChatOpenAI(model="gpt-4o-mini", temperature=0)
+from langchain_google_genai import ChatGoogleGenerativeAI
 
 system = """You are a simple query translator for a Lord of the Mysteries wiki search.
 
@@ -35,4 +34,14 @@ expand_prompt = ChatPromptTemplate.from_messages([
     ("human", "{question}")
 ])
 
-query_expander = expand_prompt | llm | StrOutputParser()
+def get_query_expander(provider: str = "openai"):
+    """Provider'a göre query expander döndürür."""
+    if provider == "gemini":
+        llm = ChatGoogleGenerativeAI(model="gemini-3-flash-preview", temperature=0)
+    else:
+        llm = ChatOpenAI(model="gpt-4o-mini", temperature=0)
+    
+    return expand_prompt | llm | StrOutputParser()
+
+# Varsayılan (geriye dönük uyumluluk)
+query_expander = get_query_expander("openai")

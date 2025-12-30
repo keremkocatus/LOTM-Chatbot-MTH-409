@@ -2,7 +2,7 @@ import re
 import os
 from ingestion import get_retriever_with_params
 from graph.state import GraphState
-from graph.chains.query_expander import query_expander
+from graph.chains.query_expander import get_query_expander
 
 # Data klasöründen pathway listesini al
 DATA_DIR = os.path.join(os.path.dirname(__file__), "..", "..", "data")
@@ -29,6 +29,7 @@ def extract_pathway(question: str) -> str:
 def retrieve(state: GraphState):
     question = state["question"]
     k = state.get("k_retrieved") or 6
+    provider = state.get("model_provider") or "openai"
     
     sequence_num = extract_sequence_number(question)
     pathway = extract_pathway(question)
@@ -47,6 +48,8 @@ def retrieve(state: GraphState):
     else:
         filter_dict = None
     
+    # Provider'a göre query expander al
+    query_expander = get_query_expander(provider)
     expanded_query = query_expander.invoke({"question": question})
     combined_query = f"{question} {expanded_query}"
     
