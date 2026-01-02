@@ -6,23 +6,6 @@ A Retrieval-Augmented Generation (RAG) chatbot specialized in answering question
 
 This chatbot uses a sophisticated RAG pipeline to answer questions about Beyonder pathways, sequences, and abilities from the Lord of the Mysteries novel series. It combines vector search with web search fallback for comprehensive answers.
 
-## 📊 RAGAS Evaluation Results
-
-The system was evaluated using [RAGAS](https://github.com/explodinggradients/ragas) (RAG Assessment) framework with Google Gemini as the judge:
-
-| Metric | Score | Status |
-|--------|-------|--------|
-| **Faithfulness** (Belgeye Sadakat) | **1.0000** | 🟢 Excellent |
-| **Context Precision** | **1.0000** | 🟢 Excellent |
-
-- **Faithfulness (1.0)**: All answers are derived entirely from retrieved documents - zero hallucination!
-- **Context Precision (1.0)**: The retrieval system finds relevant documents with perfect accuracy.
-
-Run the evaluation yourself:
-```bash
-python test_ragas.py
-```
-
 ## 🏗️ Architecture
 
 ```
@@ -307,6 +290,23 @@ The pathway data was scraped from [Lord of the Mysteries Wiki](https://lordofthe
 | `model_provider` | openai | LLM provider (openai / gemini) |
 | `k_retrieved` | 6 | Number of documents to retrieve |
 | `temperature` | 0.3 | LLM temperature (0-1) |
+
+## 📊 RAGAS Evaluation Results
+
+The system was evaluated using [RAGAS](https://github.com/explodinggradients/ragas) (RAG Assessment) framework with Google Gemini as the judge:
+
+| Metric | Score | Status |
+|--------|-------|--------|
+| **Faithfulness** (Belgeye Sadakat) | **1.0000** | 🟢 Excellent |
+| **Context Precision** | **1.0000** | 🟢 Excellent |
+
+- **Faithfulness (1.0)**: All answers are derived entirely from retrieved documents - zero hallucination!
+- **Context Precision (1.0)**: The retrieval system finds relevant documents with perfect accuracy.
+
+Run the evaluation yourself:
+```bash
+python test_ragas.py
+```
 
 ## 📄 License
 
