@@ -6,23 +6,6 @@ A Retrieval-Augmented Generation (RAG) chatbot specialized in answering question
 
 This chatbot uses a sophisticated RAG pipeline to answer questions about Beyonder pathways, sequences, and abilities from the Lord of the Mysteries novel series. It combines vector search with web search fallback for comprehensive answers.
 
-## 📊 RAGAS Evaluation Results
-
-The system was evaluated using [RAGAS](https://github.com/explodinggradients/ragas) (RAG Assessment) framework with Google Gemini as the judge:
-
-| Metric | Score | Status |
-|--------|-------|--------|
-| **Faithfulness** (Belgeye Sadakat) | **1.0000** | 🟢 Excellent |
-| **Context Precision** | **1.0000** | 🟢 Excellent |
-
-- **Faithfulness (1.0)**: All answers are derived entirely from retrieved documents - zero hallucination!
-- **Context Precision (1.0)**: The retrieval system finds relevant documents with perfect accuracy.
-
-Run the evaluation yourself:
-```bash
-python test_ragas.py
-```
-
 ## 🏗️ Architecture
 
 ```
@@ -84,7 +67,7 @@ python test_ragas.py
 2. **Off-Topic Path**: Non-LoTM questions receive automatic guidance message (no web search)
 3. **Retrieve**: Fetches relevant documents from ChromaDB with metadata filtering (pathway, sequence)
 4. **Grade Documents**: Checks document relevance; if poor → web search fallback
-5. **Generate**: Creates answer using LLM (GPT-4o or Gemini 2.0 Flash)
+5. **Generate**: Creates answer using LLM (GPT-4o or Gemini 3 Flash)
 6. **Grade Generation**: 
    - Hallucination check: Is answer grounded in documents?
    - Answer quality check: Is answer useful for the question?
@@ -95,7 +78,7 @@ python test_ragas.py
 - **LangChain & LangGraph**: Orchestration and workflow management
 - **ChromaDB**: Vector database for semantic search
 - **OpenAI**: Embeddings (`text-embedding-3-large`) and LLM (`gpt-4o`)
-- **Google Gemini**: Alternative LLM (`gemini-2.0-flash`)
+- **Google Gemini**: Alternative LLM (`gemini-3-flash`)
 - **DuckDuckGo**: Free web search fallback
 - **Streamlit**: Web UI with model selection
 - **RAGAS**: RAG evaluation framework
@@ -307,6 +290,23 @@ The pathway data was scraped from [Lord of the Mysteries Wiki](https://lordofthe
 | `model_provider` | openai | LLM provider (openai / gemini) |
 | `k_retrieved` | 6 | Number of documents to retrieve |
 | `temperature` | 0.3 | LLM temperature (0-1) |
+
+## 📊 RAGAS Evaluation Results
+
+The system was evaluated using [RAGAS](https://github.com/explodinggradients/ragas) (RAG Assessment) framework with Google Gemini as the judge:
+
+| Metric | Score | Status |
+|--------|-------|--------|
+| **Faithfulness** (Belgeye Sadakat) | **1.0000** | 🟢 Excellent |
+| **Context Precision** | **1.0000** | 🟢 Excellent |
+
+- **Faithfulness (1.0)**: All answers are derived entirely from retrieved documents - zero hallucination!
+- **Context Precision (1.0)**: The retrieval system finds relevant documents with perfect accuracy.
+
+Run the evaluation yourself:
+```bash
+python test_ragas.py
+```
 
 ## 📄 License
 
