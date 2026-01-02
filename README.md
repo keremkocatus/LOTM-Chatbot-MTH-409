@@ -84,7 +84,7 @@ python test_ragas.py
 2. **Off-Topic Path**: Non-LoTM questions receive automatic guidance message (no web search)
 3. **Retrieve**: Fetches relevant documents from ChromaDB with metadata filtering (pathway, sequence)
 4. **Grade Documents**: Checks document relevance; if poor → web search fallback
-5. **Generate**: Creates answer using LLM (GPT-4o or Gemini 2.0 Flash)
+5. **Generate**: Creates answer using LLM (GPT-4o or Gemini 3 Flash)
 6. **Grade Generation**: 
    - Hallucination check: Is answer grounded in documents?
    - Answer quality check: Is answer useful for the question?
@@ -95,7 +95,7 @@ python test_ragas.py
 - **LangChain & LangGraph**: Orchestration and workflow management
 - **ChromaDB**: Vector database for semantic search
 - **OpenAI**: Embeddings (`text-embedding-3-large`) and LLM (`gpt-4o`)
-- **Google Gemini**: Alternative LLM (`gemini-2.0-flash`)
+- **Google Gemini**: Alternative LLM (`gemini-3-flash`)
 - **DuckDuckGo**: Free web search fallback
 - **Streamlit**: Web UI with model selection
 - **RAGAS**: RAG evaluation framework
