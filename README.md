@@ -6,54 +6,94 @@ A Retrieval-Augmented Generation (RAG) chatbot specialized in answering question
 
 This chatbot uses a sophisticated RAG pipeline to answer questions about Beyonder pathways, sequences, and abilities from the Lord of the Mysteries novel series. It combines vector search with web search fallback for comprehensive answers.
 
+## 📊 RAGAS Evaluation Results
+
+The system was evaluated using [RAGAS](https://github.com/explodinggradients/ragas) (RAG Assessment) framework with Google Gemini as the judge:
+
+| Metric | Score | Status |
+|--------|-------|--------|
+| **Faithfulness** (Belgeye Sadakat) | **1.0000** | 🟢 Excellent |
+| **Context Precision** | **1.0000** | 🟢 Excellent |
+
+- **Faithfulness (1.0)**: All answers are derived entirely from retrieved documents - zero hallucination!
+- **Context Precision (1.0)**: The retrieval system finds relevant documents with perfect accuracy.
+
+Run the evaluation yourself:
+```bash
+python test_ragas.py
+```
+
 ## 🏗️ Architecture
 
 ```
-┌─────────────┐     ┌──────────────────┐     ┌─────────────────┐
-│   Question  │────▶│  Question Router │────▶│  Vector Store   │
-└─────────────┘     └──────────────────┘     │   (ChromaDB)    │
-                            │                └────────┬────────┘
-                            │                         │
-                            ▼                         ▼
-                    ┌───────────────┐        ┌───────────────┐
-                    │  Web Search   │        │   Retrieve    │
-                    │ (DuckDuckGo)  │        │   Documents   │
-                    └───────┬───────┘        └───────┬───────┘
-                            │                         │
-                            │                         ▼
-                            │                ┌───────────────┐
-                            │                │    Grade      │
-                            │                │   Documents   │
-                            │                └───────┬───────┘
-                            │                         │
-                            │         ┌───────────────┴───────────────┐
-                            │         │                               │
-                            │         ▼                               ▼
-                            │  ┌─────────────┐              ┌───────────────┐
-                            │  │  Generate   │──────────────│  Web Search   │
-                            │  │   Answer    │   (fallback) │  (DuckDuckGo) │
-                            │  └──────┬──────┘              └───────────────┘
-                            │         │
-                            │         ▼
-                            │  ┌─────────────┐
-                            │  │   Grade     │
-                            │  │ Generation  │
-                            │  └──────┬──────┘
-                            │         │
-                            ▼         ▼
-                    ┌─────────────────────────┐
-                    │        Response         │
-                    └─────────────────────────┘
+                                    ┌─────────────────┐
+                                    │    Question     │
+                                    └────────┬────────┘
+                                             │
+                                             ▼
+                                    ┌─────────────────┐
+                                    │ Question Router │
+                                    └────────┬────────┘
+                                             │
+                         ┌───────────────────┼───────────────────┐
+                         │                   │                   │
+                         ▼                   ▼                   │
+                ┌─────────────────┐  ┌─────────────────┐         │
+                │    Off-Topic    │  │    Retrieve     │         │
+                │   (Web Search)  │  │   (ChromaDB)    │         │
+                └────────┬────────┘  └────────┬────────┘         │
+                         │                    │                  │
+                         │                    ▼                  │
+                         │           ┌─────────────────┐         │
+                         │           │ Grade Documents │         │
+                         │           └────────┬────────┘         │
+                         │                    │                  │
+                         │        ┌───────────┴───────────┐      │
+                         │        │                       │      │
+                         │        ▼                       ▼      │
+                         │  ┌───────────┐         ┌───────────┐  │
+                         │  │  Generate │         │Web Search │  │
+                         │  │  Answer   │         │(Fallback) │  │
+                         │  └─────┬─────┘         └─────┬─────┘  │
+                         │        │                     │        │
+                         │        ▼                     │        │
+                         │  ┌───────────────────┐       │        │
+                         │  │  Grade Generation │       │        │
+                         │  │ • Hallucination   │       │        │
+                         │  │ • Answer Quality  │       │        │
+                         │  └─────────┬─────────┘       │        │
+                         │            │                 │        │
+                         │     ┌──────┴──────┐          │        │
+                         │     │             │          │        │
+                         │     ▼             ▼          │        │
+                         │  ┌─────┐    ┌───────────┐    │        │
+                         │  │ END │    │Web Search │    │        │
+                         │  └─────┘    │(Fallback) │    │        │
+                         │             └─────┬─────┘    │        │
+                         │                   │          │        │
+                         ▼                   ▼          ▼        │
+                    ┌─────────────────────────────────────────────┘
+                    │                 Response
+                    └─────────────────────────────────────────────
 ```
+
+### Workflow Steps:
+1. **Question Router**: Routes LoTM questions to vector store, off-topic to web search
+2. **Retrieve**: Fetches relevant documents from ChromaDB with metadata filtering
+3. **Grade Documents**: Filters irrelevant documents, triggers web search if needed
+4. **Generate**: Creates answer using LLM (GPT-4o or Gemini)
+5. **Grade Generation**: Checks for hallucination and answer quality
+6. **Fallback**: Uses DuckDuckGo web search if generation fails
 
 ## 🛠️ Tech Stack
 
 - **LangChain & LangGraph**: Orchestration and workflow management
 - **ChromaDB**: Vector database for semantic search
 - **OpenAI**: Embeddings (`text-embedding-3-large`) and LLM (`gpt-4o`)
-- **Google Gemini**: Alternative LLM (`gemini-3-flash-preview`)
+- **Google Gemini**: Alternative LLM (`gemini-2.0-flash`)
 - **DuckDuckGo**: Free web search fallback
 - **Streamlit**: Web UI with model selection
+- **RAGAS**: RAG evaluation framework
 
 ## 📁 Project Structure
 
@@ -62,6 +102,8 @@ LOTM-Chatbot-MTH-409/
 ├── app_ui.py              # Streamlit web interface
 ├── ingestion.py           # Data indexing to ChromaDB
 ├── main.py                # CLI entry point
+├── test_ragas.py          # RAGAS evaluation script
+├── ragas_results.csv      # Evaluation results
 ├── requirements.txt       # Python dependencies
 ├── .env                   # Environment variables (not in repo)
 ├── data/                  # Scraped pathway data (JSON)
@@ -104,6 +146,7 @@ venv\Scripts\activate     # Windows
 ### 3. Install dependencies
 ```bash
 pip install -r requirements.txt
+pip install ragas datasets  # For evaluation
 ```
 
 ### 4. Configure environment variables
@@ -132,7 +175,7 @@ streamlit run app_ui.py
 
 ### 🤖 Multi-Model Support
 - **OpenAI GPT-4o**: High-quality responses with OpenAI
-- **Google Gemini 3 Flash**: Fast and efficient alternative
+- **Google Gemini 2.0 Flash**: Fast and efficient alternative
 - Switch between models via sidebar toggle in the UI
 
 ### Smart Query Routing
@@ -268,7 +311,8 @@ MIT License
 
 - [Lord of the Mysteries Wiki](https://lordofthemysteries.fandom.com/) for the pathway data
 - [Cuttlefish That Loves Diving](https://www.novelupdates.com/nauthor/cuttlefish-that-loves-diving/) - Author of Lord of the Mysteries
+- [RAGAS](https://github.com/explodinggradients/ragas) - RAG evaluation framework
 
 ---
 
-**MTH-409 Course Project** | December 2025
+**MTH-409 Course Project** | January 2026
